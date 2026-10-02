@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Ludo Games - Royal Board Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            900: '#070B14',
+                            800: '#0F172A',
+                            700: '#1E293B',
+                            600: '#334155'
+                        },
+                        gold: {
+                            100: '#FEF3C7',
+                            300: '#FDE047',
+                            400: '#F59E0B',
+                            500: '#D4AF37',
+                            600: '#B8860B',
+                            700: '#92400E'
+                        },
+                        cream: {
+                            100: '#FFFDF9',
+                            200: '#FDFBF7',
+                            300: '#F3EFE6'
+                        },
+                        teamRed: {
+                            DEFAULT: '#DC2626',
+                            dark: '#991B1B',
+                            light: '#FCA5A5'
+                        },
+                        teamBlue: {
+                            DEFAULT: '#2563EB',
+                            dark: '#1E40AF',
+                            light: '#93C5FD'
+                        }
+                    },
+                    fontFamily: {
+                        cinzel: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070B14;
+            color: #FEF3C7;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Gold Gradient Borders & Effects */
+        .gold-border-gradient {
+            border: 2px solid transparent;
+            background-image: linear-gradient(#0F172A, #0F172A), linear-gradient(135deg, #FFE082, #D4AF37, #B8860B);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .gold-glow {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+        }
+
+        .gold-glow-lg {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.55);
+        }
+
+        .tile-shadow {
+            box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Custom Scrollbar for activity log */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 2px;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes overlay-pop {
+            0% { opacity: 0; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .animate-overlay {
+            animation: overlay-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .card-grayscale {
+            filter: grayscale(100%) brightness(0.6);
+            cursor: not-allowed !important;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between p-2 md:p-3 bg-navy-900 text-gold-100 overflow-hidden relative">
+
+    <!-- Background Decorative Elements (Chess & Cards Silhouettes) -->
+    <div class="absolute inset-0 pointer-events-none opacity-5 flex justify-between items-center px-10">
+        <i class="fa-solid fa-chess-king text-[18vw]"></i>
+        <i class="fa-solid fa-chess-rook text-[18vw]"></i>
+    </div>
+
+    <!-- TOP HEADER BAR -->
+    <header class="relative z-10 flex items-center justify-between border-b border-gold-500/30 pb-2 px-2">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center text-navy-900 shadow-md">
+                <i class="fa-solid fa-crown text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-cinzel text-xl md:text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gold-100 via-gold-300 to-gold-500 uppercase drop-shadow">
+                    English Ludo Games
+                </h1>
+                <p class="text-[10px] text-gold-400/80 tracking-wider font-semibold uppercase">Royal Edition • Interactive Educational Board</p>
+            </div>
+        </div>
+
+        <!-- Global Control Buttons -->
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleRuleModal()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-navy-800 border border-gold-500/50 hover:bg-gold-500/20 text-gold-300 transition flex items-center space-x-1.5 shadow">
+                <i class="fa-solid fa-scroll"></i>
+                <span class="hidden sm:inline">Rules</span>
+            </button>
+            <button onclick="resetEntireGame()" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-950/80 border border-red-500/50 hover:bg-red-900/80 text-red-200 transition flex items-center space-x-1.5 shadow">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span class="hidden sm:inline">Reset Game</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN INTERACTIVE BOARD CONTAINER -->
+    <main class="relative z-10 flex-1 my-1 flex items-center justify-center overflow-hidden">
+        
+        <div class="w-full h-full max-w-7xl flex flex-col lg:flex-row items-center justify-between gap-3">
+            
+            <!-- LEFT PANEL: TEAM 1 CARDS & CONTROLS -->
+            <div class="w-full lg:w-64 bg-navy-800/90 rounded-xl p-2.5 border border-gold-500/30 flex flex-col justify-between shadow-xl backdrop-blur-sm h-auto lg:h-full max-h-[180px] lg:max-h-full">
+                <!-- Team 1 Header -->
+                <div class="flex items-center justify-between pb-2 border-b border-teamRed/30">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 rounded-full bg-teamRed shadow-[0_0_8px_#DC2626]"></div>
+                        <h2 class="font-cinzel font-bold text-teamRed-light tracking-wide text-sm">TEAM 1 (RED)</h2>
+                    </div>
+                    <span id="t1-pos-badge" class="text-[10px] bg-teamRed/20 text-teamRed-light px-2 py-0.5 rounded font-mono font-bold border border-teamRed/40">Tile: START</span>
+                </div>
+
+                <!-- Team 1 Cards -->
+                <div class="my-2 space-y-1.5 flex-1 flex flex-row lg:flex-col justify-between gap-1.5">
+                    <!-- Attack Card -->
+                    <div id="card-t1-attack" onclick="handleCardClick('team1', 'attack')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-burst text-red-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Attack Card</div>
+                                <div class="text-[9px] text-gray-400">Move Opponent Back 3</div>
+                            </div>
+                        </div>
+                        <span id="status-t1-attack" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+
+                    <!-- Defense Card -->
+                    <div id="card-t1-defense" onclick="handleCardClick('team1', 'defense')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-shield-halved text-blue-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Defense Card</div>
+                                <div class="text-[9px] text-gray-400">Shield 1 Attack</div>
+                            </div>
+                        </div>
+                        <span id="status-t1-defense" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+
+                    <!-- Lucky Card -->
+                    <div id="card-t1-lucky" onclick="handleCardClick('team1', 'lucky')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-clover text-green-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Lucky Card</div>
+                                <div class="text-[9px] text-gray-400">Skip 1 Challenge</div>
+                            </div>
+                        </div>
+                        <span id="status-t1-lucky" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+                </div>
+
+                <!-- Team 1 Movement Controls -->
+                <div class="pt-1.5 border-t border-gold-500/20 flex items-center space-x-1">
+                    <button onclick="moveTeam('team1', -1)" class="px-2 py-1 bg-navy-700 hover:bg-navy-600 border border-gold-500/30 text-xs rounded font-bold text-gold-300">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <button onclick="moveTeam('team1', 1)" class="flex-1 py-1 bg-teamRed-dark hover:bg-teamRed border border-teamRed text-xs rounded font-bold text-white shadow transition flex items-center justify-center space-x-1">
+                        <span>Move T1 Forward</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CENTER BOARD GEOMETRY CONTAINER -->
+            <div class="flex-1 h-full flex items-center justify-center p-1 w-full max-h-[75vh] md:max-h-full">
+                
+                <!-- Physical Board Outer Frame -->
+                <div class="relative bg-gradient-to-b from-navy-800 to-navy-900 rounded-2xl p-3 md:p-4 border-2 border-gold-500/60 shadow-[0_0_40px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center w-full h-full max-w-4xl aspect-auto md:aspect-[4/3] overflow-auto">
+                    
+                    <!-- Inner Gold Filigree Corner Accents -->
+                    <div class="absolute top-2 left-2 text-gold-500/40 text-lg"><i class="fa-solid fa-chess-rook"></i></div>
+                    <div class="absolute top-2 right-2 text-gold-500/40 text-lg"><i class="fa-solid fa-chess-rook"></i></div>
+                    <div class="absolute bottom-2 left-2 text-gold-500/40 text-lg"><i class="fa-solid fa-chess-knight"></i></div>
+                    <div class="absolute bottom-2 right-2 text-gold-500/40 text-lg"><i class="fa-solid fa-chess-knight"></i></div>
+
+                    <!-- BOARD GRID WRAPPER (Absolute Upward Vertical + Centered Junction Horizontal) -->
+                    <div class="relative flex flex-col items-center justify-center w-full max-w-3xl my-auto">
+                        
+                        <!-- VERTICAL PATH (Upward from 7 to FINISH) -->
+                        <div class="flex flex-col items-center space-y-1 mb-1">
+                            <!-- FINISH TILE -->
+                            <div id="tile-finish" onclick="openChallenge('FINISH')" class="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-300 text-navy-900 font-cinzel font-black flex flex-col items-center justify-center border-2 border-gold-100 shadow-[0_0_20px_rgba(212,175,55,0.8)] cursor-pointer transform hover:scale-110 transition relative group">
+                                <i class="fa-solid fa-crown text-base md:text-xl text-amber-900 animate-bounce"></i>
+                                <span class="text-[9px] font-bold tracking-widest text-amber-950 uppercase">FINISH</span>
+                                <div id="pawn-container-finish" class="absolute -top-1 -right-1 flex space-x-0.5"></div>
+                            </div>
+
+                            <!-- Arrow Up -->
+                            <i class="fa-solid fa-chevron-up text-gold-400/60 text-xs my-0.5"></i>
+
+                            <!-- Path 11 -->
+                            <div id="tile-vert-11" onclick="openChallenge(11)" class="board-tile w-10 h-10 md:w-12 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-base md:text-lg flex items-center justify-center shadow-md cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative tile-shadow">
+                                <span>11</span>
+                                <div id="pawn-container-11" class="absolute inset-0 flex items-center justify-center space-x-1 pointer-events-none"></div>
+                            </div>
+
+                            <!-- Path 10 -->
+                            <div id="tile-vert-10" onclick="openChallenge(10)" class="board-tile w-10 h-10 md:w-12 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-base md:text-lg flex items-center justify-center shadow-md cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative tile-shadow">
+                                <span>10</span>
+                                <div id="pawn-container-10" class="absolute inset-0 flex items-center justify-center space-x-1 pointer-events-none"></div>
+                            </div>
+
+                            <!-- Path 9 -->
+                            <div id="tile-vert-9" onclick="openChallenge(9)" class="board-tile w-10 h-10 md:w-12 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-base md:text-lg flex items-center justify-center shadow-md cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative tile-shadow">
+                                <span>9</span>
+                                <div id="pawn-container-9" class="absolute inset-0 flex items-center justify-center space-x-1 pointer-events-none"></div>
+                            </div>
+
+                            <!-- Path 8 -->
+                            <div id="tile-vert-8" onclick="openChallenge(8)" class="board-tile w-10 h-10 md:w-12 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-base md:text-lg flex items-center justify-center shadow-md cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative tile-shadow">
+                                <span>8</span>
+                                <div id="pawn-container-8" class="absolute inset-0 flex items-center justify-center space-x-1 pointer-events-none"></div>
+                            </div>
+                        </div>
+
+
+                        <!-- HORIZONTAL PATH (Left to Right with Single Shared Center 7 Tile) -->
+                        <div class="flex items-center justify-center space-x-1 md:space-x-1.5 w-full overflow-x-auto py-1">
+                            
+                            <!-- START TEAM 1 (Red) -->
+                            <div id="tile-start-t1" onclick="movePawnToStart('team1')" class="w-12 h-10 md:w-16 md:h-12 rounded-lg bg-gradient-to-r from-teamRed-dark to-teamRed text-white font-cinzel font-bold text-[10px] md:text-xs flex flex-col items-center justify-center border-2 border-gold-400 shadow-md cursor-pointer hover:brightness-110 transition shrink-0 relative">
+                                <span>START</span>
+                                <span class="text-[8px] opacity-80">TEAM 1</span>
+                                <div id="pawn-container-start-t1" class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+                            </div>
+
+                            <!-- Path Left 1 to 6 -->
+                            <div id="tile-horiz-left-1" onclick="openChallenge(1)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>1</span>
+                                <div id="pawn-container-left-1" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-left-2" onclick="openChallenge(2)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>2</span>
+                                <div id="pawn-container-left-2" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-left-3" onclick="openChallenge(3)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>3</span>
+                                <div id="pawn-container-left-3" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-left-4" onclick="openChallenge(4)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>4</span>
+                                <div id="pawn-container-left-4" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-left-5" onclick="openChallenge(5)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>5</span>
+                                <div id="pawn-container-left-5" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-left-6" onclick="openChallenge(6)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>6</span>
+                                <div id="pawn-container-left-6" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+
+                            <!-- SINGLE SHARED JUNCTION CENTER 7 TILE -->
+                            <div id="tile-center-7" onclick="openChallenge(7)" class="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-gold-300 via-gold-400 to-gold-600 border-2 border-gold-100 text-navy-900 font-cinzel font-black text-lg md:text-2xl flex flex-col items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.6)] cursor-pointer hover:scale-110 transition relative shrink-0 z-20">
+                                <i class="fa-solid fa-star text-[9px] text-amber-900 mb-0.5"></i>
+                                <span>7</span>
+                                <div id="pawn-container-center-7" class="absolute inset-0 flex items-center justify-center space-x-1 pointer-events-none"></div>
+                            </div>
+
+                            <!-- Path Right 6 to 1 -->
+                            <div id="tile-horiz-right-6" onclick="openChallenge(6)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>6</span>
+                                <div id="pawn-container-right-6" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-right-5" onclick="openChallenge(5)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>5</span>
+                                <div id="pawn-container-right-5" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-right-4" onclick="openChallenge(4)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>4</span>
+                                <div id="pawn-container-right-4" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-right-3" onclick="openChallenge(3)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>3</span>
+                                <div id="pawn-container-right-3" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-right-2" onclick="openChallenge(2)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>2</span>
+                                <div id="pawn-container-right-2" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+                            <div id="tile-horiz-right-1" onclick="openChallenge(1)" class="board-tile w-8 h-10 md:w-11 md:h-12 rounded-lg bg-cream-200 border-2 border-gold-500 text-navy-800 font-cinzel font-bold text-xs md:text-base flex items-center justify-center shadow cursor-pointer hover:border-gold-300 hover:bg-white hover:scale-105 transition relative shrink-0">
+                                <span>1</span>
+                                <div id="pawn-container-right-1" class="absolute inset-0 flex items-center justify-center space-x-0.5 pointer-events-none"></div>
+                            </div>
+
+                            <!-- START TEAM 2 (Blue) -->
+                            <div id="tile-start-t2" onclick="movePawnToStart('team2')" class="w-12 h-10 md:w-16 md:h-12 rounded-lg bg-gradient-to-r from-teamBlue-dark to-teamBlue text-white font-cinzel font-bold text-[10px] md:text-xs flex flex-col items-center justify-center border-2 border-gold-400 shadow-md cursor-pointer hover:brightness-110 transition shrink-0 relative">
+                                <span>START</span>
+                                <span class="text-[8px] opacity-80">TEAM 2</span>
+                                <div id="pawn-container-start-t2" class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CENTRAL DICE & ROLL CONTROLLER -->
+                    <div class="mt-3 flex items-center justify-between w-full max-w-lg bg-navy-900/80 px-4 py-1.5 rounded-xl border border-gold-500/30">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-dice text-gold-400 text-lg"></i>
+                            <span class="text-xs font-bold text-gold-200">Judge Dice Control:</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="dice-result" class="w-8 h-8 rounded-lg bg-gold-500/20 border border-gold-500 text-gold-300 font-bold flex items-center justify-center text-sm font-mono">-</span>
+                            <button onclick="rollDice()" class="px-3 py-1 bg-gradient-to-r from-gold-600 to-gold-400 hover:from-gold-500 hover:to-gold-300 text-navy-900 font-bold text-xs rounded-lg shadow transition">
+                                ROLL DICE
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: TEAM 2 CARDS & ACTIVITY LOG -->
+            <div class="w-full lg:w-64 bg-navy-800/90 rounded-xl p-2.5 border border-gold-500/30 flex flex-col justify-between shadow-xl backdrop-blur-sm h-auto lg:h-full max-h-[220px] lg:max-h-full">
+                
+                <!-- Team 2 Header -->
+                <div class="flex items-center justify-between pb-2 border-b border-teamBlue/30">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-4 h-4 rounded-full bg-teamBlue shadow-[0_0_8px_#2563EB]"></div>
+                        <h2 class="font-cinzel font-bold text-teamBlue-light tracking-wide text-sm">TEAM 2 (BLUE)</h2>
+                    </div>
+                    <span id="t2-pos-badge" class="text-[10px] bg-teamBlue/20 text-teamBlue-light px-2 py-0.5 rounded font-mono font-bold border border-teamBlue/40">Tile: START</span>
+                </div>
+
+                <!-- Team 2 Cards -->
+                <div class="my-2 space-y-1.5 flex-1 flex flex-row lg:flex-col justify-between gap-1.5">
+                    <!-- Attack Card -->
+                    <div id="card-t2-attack" onclick="handleCardClick('team2', 'attack')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-burst text-red-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Attack Card</div>
+                                <div class="text-[9px] text-gray-400">Move Opponent Back 3</div>
+                            </div>
+                        </div>
+                        <span id="status-t2-attack" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+
+                    <!-- Defense Card -->
+                    <div id="card-t2-defense" onclick="handleCardClick('team2', 'defense')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-shield-halved text-blue-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Defense Card</div>
+                                <div class="text-[9px] text-gray-400">Shield 1 Attack</div>
+                            </div>
+                        </div>
+                        <span id="status-t2-defense" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+
+                    <!-- Lucky Card -->
+                    <div id="card-t2-lucky" onclick="handleCardClick('team2', 'lucky')" class="flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden group shadow">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-clover text-green-400 text-sm"></i>
+                            <div>
+                                <div class="text-[11px] font-bold text-gold-100 uppercase">Lucky Card</div>
+                                <div class="text-[9px] text-gray-400">Skip 1 Challenge</div>
+                            </div>
+                        </div>
+                        <span id="status-t2-lucky" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40">AVAILABLE</span>
+                    </div>
+                </div>
+
+                <!-- Team 2 Movement Controls -->
+                <div class="pt-1.5 border-t border-gold-500/20 flex items-center space-x-1">
+                    <button onclick="moveTeam('team2', -1)" class="px-2 py-1 bg-navy-700 hover:bg-navy-600 border border-gold-500/30 text-xs rounded font-bold text-gold-300">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <button onclick="moveTeam('team2', 1)" class="flex-1 py-1 bg-teamBlue-dark hover:bg-teamBlue border border-teamBlue text-xs rounded font-bold text-white shadow transition flex items-center justify-center space-x-1">
+                        <span>Move T2 Forward</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- GAME ACTIVITY LOG BOX -->
+                <div class="mt-2 pt-2 border-t border-gold-500/30">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-bold text-gold-400 uppercase tracking-wider flex items-center space-x-1">
+                            <i class="fa-solid fa-list-ul"></i>
+                            <span>Activity Log</span>
+                        </span>
+                        <button onclick="clearActivityLog()" class="text-[9px] text-gray-400 hover:text-gold-300">Clear</button>
+                    </div>
+                    <div id="activity-log" class="h-16 lg:h-20 bg-navy-900/90 rounded border border-navy-700 p-1.5 text-[10px] space-y-1 overflow-y-auto font-mono text-gold-200/90">
+                        <div class="text-gray-500 italic">Game initialized. Ready for play.</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- CHALLENGE MODAL OVERLAY -->
+    <div id="challenge-modal" class="fixed inset-0 z-50 bg-navy-900/95 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-gradient-to-b from-navy-800 to-navy-900 rounded-2xl border-2 border-gold-500/80 p-5 md:p-6 shadow-[0_0_50px_rgba(212,175,55,0.4)] relative flex flex-col justify-between max-h-[90vh] overflow-y-auto">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-gold-500/30 pb-3">
+                <div class="flex items-center space-x-3">
+                    <span id="challenge-num-badge" class="w-10 h-10 rounded-xl bg-gold-500 text-navy-900 font-cinzel font-black text-xl flex items-center justify-center shadow">
+                        1
+                    </span>
+                    <div>
+                        <div id="challenge-header-title" class="text-xs text-gold-400 uppercase font-bold tracking-widest">CHALLENGE 1</div>
+                        <h3 id="challenge-title" class="font-cinzel text-xl md:text-2xl font-bold text-white">FRAME IT</h3>
+                    </div>
+                </div>
+                <button onclick="closeChallengeModal()" class="px-3 py-1.5 bg-navy-700 hover:bg-navy-600 border border-gold-500/40 rounded-lg text-gold-300 text-xs font-bold transition flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>BACK TO BOARD</span>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="my-4 space-y-4">
+                
+                <!-- Instruction Box -->
+                <div class="bg-navy-900/80 p-3.5 rounded-xl border border-navy-700">
+                    <label class="text-[10px] text-gold-400 font-bold uppercase tracking-wider block mb-1">INSTRUCTION</label>
+                    <p id="challenge-instruction" class="text-sm md:text-base text-gray-100 font-medium leading-relaxed">
+                        Create three sentences using the given word: one in Simple Present, one in Simple Past, and one in Simple Future.
+                    </p>
+                </div>
+
+                <!-- Given Word / Topic Input (Conditional) -->
+                <div id="given-word-container" class="bg-navy-900/80 p-3.5 rounded-xl border border-navy-700">
+                    <label class="text-[10px] text-gold-300 font-bold uppercase tracking-wider flex items-center space-x-1 mb-1.5">
+                        <i class="fa-solid fa-pen-nib"></i>
+                        <span>GIVEN WORD / TOPIC (JUDGE INPUT)</span>
+                    </label>
+                    <input type="text" id="given-word-input" placeholder="Type given word or topic here..." class="w-full bg-navy-800 border border-gold-500/50 rounded-lg px-3 py-2 text-sm text-gold-100 focus:outline-none focus:border-gold-300 transition">
+                </div>
+
+                <!-- Success Indicator Box -->
+                <div class="bg-gradient-to-r from-emerald-950/60 to-navy-900 p-3.5 rounded-xl border border-emerald-500/50 shadow">
+                    <label class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center space-x-1.5 mb-1">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>✓ SUCCESS INDICATOR</span>
+                    </label>
+                    <p id="challenge-success" class="text-xs md:text-sm text-emerald-200/90 leading-relaxed">
+                        Peserta mampu membuat 3 kalimat: 1 Simple Present, 1 Simple Past, dan 1 Simple Future secara tepat.
+                    </p>
+                </div>
+
+                <!-- 1-Minute Timer Section -->
+                <div class="bg-navy-900 p-4 rounded-xl border border-gold-500/40 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-stopwatch text-2xl text-gold-400"></i>
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">CHALLENGE TIMER</span>
+                            <div id="timer-display" class="font-mono text-3xl md:text-4xl font-bold text-gold-300 tracking-wider">01:00</div>
+                        </div>
+                    </div>
+
+                    <!-- Timer Controls -->
+                    <div class="flex items-center space-x-2 w-full md:w-auto">
+                        <button onclick="startTimer()" class="flex-1 md:flex-none px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-play"></i>
+                            <span>START</span>
+                        </button>
+                        <button onclick="pauseTimer()" class="flex-1 md:flex-none px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-pause"></i>
+                            <span>PAUSE</span>
+                        </button>
+                        <button onclick="resetTimer()" class="flex-1 md:flex-none px-4 py-2 bg-navy-700 hover:bg-navy-600 border border-gold-500/40 text-gold-300 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>RESET</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Action -->
+            <div class="pt-2 border-t border-gold-500/30 flex justify-end">
+                <button onclick="closeChallengeModal()" class="w-full md:w-auto px-6 py-2.5 bg-gradient-to-r from-gold-600 via-gold-500 to-gold-400 hover:brightness-110 text-navy-900 font-cinzel font-bold text-sm rounded-xl shadow transition">
+                    RETURN TO BOARD
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-navy-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-navy-800 rounded-2xl border-2 border-gold-500 p-6 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-400 border border-gold-500 flex items-center justify-center mx-auto text-xl">
+                <i id="confirm-icon" class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 id="confirm-title" class="font-cinzel text-xl font-bold text-white uppercase">USE CARD?</h3>
+            <p id="confirm-msg" class="text-xs text-gold-200/80 leading-relaxed">Are you sure you want to activate this card?</p>
+            <div class="flex items-center justify-center space-x-3 pt-2">
+                <button onclick="closeConfirmModal(false)" class="px-5 py-2 bg-navy-700 hover:bg-navy-600 text-gold-300 font-bold text-xs rounded-lg border border-gold-500/30">CANCEL</button>
+                <button id="confirm-btn-yes" onclick="closeConfirmModal(true)" class="px-5 py-2 bg-gold-500 hover:bg-gold-400 text-navy-900 font-bold text-xs rounded-lg shadow">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL-SCREEN CARD EVENT NOTIFICATION OVERLAY -->
+    <div id="fullscreen-notification" class="fixed inset-0 z-50 bg-navy-900/98 hidden flex flex-col items-center justify-center p-6 text-center animate-overlay">
+        <div class="relative bg-navy-800/90 border-2 border-gold-500 rounded-3xl p-8 md:p-12 max-w-xl shadow-[0_0_80px_rgba(212,175,55,0.6)] space-y-5">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-200 text-navy-900 flex items-center justify-center mx-auto text-4xl shadow-lg animate-bounce">
+                <i id="notify-icon" class="fa-solid fa-shield-cat"></i>
+            </div>
+            <h2 id="notify-title" class="font-cinzel text-2xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold-100 via-gold-300 to-gold-500 uppercase tracking-widest">
+                CARD ACTIVATED
+            </h2>
+            <p id="notify-subtitle" class="font-cinzel text-lg text-gold-300 font-bold">Effect Applied</p>
+            <div class="w-16 h-0.5 bg-gold-500/40 mx-auto"></div>
+            <p id="notify-description" class="text-sm md:text-base text-gray-200 font-medium leading-relaxed max-w-md mx-auto">
+                Details regarding the action will be described here clearly.
+            </p>
+        </div>
+    </div>
+
+    <!-- RULES MODAL -->
+    <div id="rules-modal" class="fixed inset-0 z-50 bg-navy-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-xl bg-navy-800 rounded-2xl border border-gold-500 p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
+            <div class="flex items-center justify-between border-b border-gold-500/30 pb-3">
+                <h3 class="font-cinzel text-xl font-bold text-gold-300">ENGLISH LUDO GAME RULES</h3>
+                <button onclick="toggleRuleModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="text-xs text-gray-200 space-y-3 leading-relaxed">
+                <p><strong>Board Flow:</strong> Both Team 1 and Team 2 start on their respective sides and progress towards tile 7 at the center. From 7, the path moves vertically upward through tiles 8, 9, 10, 11 to FINISH.</p>
+                <p><strong>Challenges:</strong> Clicking a tile opens its challenge. Duplicate numbers (e.g. both 1s, both 2s) open the exact same challenge.</p>
+                <p><strong>Card Mechanics:</strong> Each team gets 3 interactive cards used once per game:</p>
+                <ul class="list-disc pl-5 space-y-1 text-gold-200">
+                    <li><strong>Attack Card:</strong> Moves opposing team back 3 steps unless blocked by Defense.</li>
+                    <li><strong>Defense Card:</strong> Shields team against 1 incoming attack card.</li>
+                    <li><strong>Lucky Card:</strong> Protects team by skipping 1 challenge entirely.</li>
+                </ul>
+            </div>
+            <button onclick="toggleRuleModal()" class="w-full py-2 bg-gold-500 text-navy-900 font-bold text-xs rounded-lg">CLOSE</button>
+        </div>
+    </div>
+
+
+    <script>
+        /* ==========================================================================
+           CHALLENGE DATA STRUCTURE (1 to 11)
+           ========================================================================== */
+        const CHALLENGES = {
+            1: {
+                id: 1,
+                title: "FRAME IT",
+                instruction: "Create three sentences using the given word: one in Simple Present, one in Simple Past, and one in Simple Future.",
+                successIndicator: "Peserta mampu membuat 3 kalimat: 1 Simple Present, 1 Simple Past, dan 1 Simple Future secara tepat.",
+                duration: 60,
+                requiresGivenInput: true
+            },
+            2: {
+                id: 2,
+                title: "ONE MINUTE SPEECH",
+                instruction: "Give a one-minute speech about the topic given by the judge.",
+                successIndicator: "Peserta mampu berbicara selama 1 menit mengenai topik yang diberikan dengan isi yang sesuai.",
+                duration: 60,
+                requiresGivenInput: true
+            },
+            3: {
+                id: 3,
+                title: "WORD BUILDER",
+                instruction: "Create a meaningful sentence using the given word.",
+                successIndicator: "Peserta mampu membuat satu kalimat yang benar dan bermakna menggunakan kata yang diberikan.",
+                duration: 60,
+                requiresGivenInput: true
+            },
+            4: {
+                id: 4,
+                title: "INTRODUCTION",
+                instruction: "Introduce one of yourself. Mention your name and some basic information about you.",
+                successIndicator: "Peserta mampu memperkenalkan diri atau salah satu anggota kelompok menggunakan bahasa Inggris.",
+                duration: 60,
+                requiresGivenInput: false
+            },
+            5: {
+                id: 5,
+                title: "REVERSE",
+                instruction: "Choose a word and give its opposite.",
+                successIndicator: "Peserta mampu memilih satu kata dan menyebutkan antonimnya dengan tepat.",
+                duration: 60,
+                requiresGivenInput: false
+            },
+            6: {
+                id: 6,
+                title: "FORBIDDEN WORD",
+                instruction: "Talk about the given topic for one minute without saying the forbidden word.",
+                successIndicator: "Peserta mampu berbicara selama 1 menit mengenai topik yang diberikan tanpa menyebutkan kata yang dilarang.",
+                duration: 60,
+                requiresGivenInput: true
+            },
+            7: {
+                id: 7,
+                title: "VOCABULARY CHALLENGE",
+                instruction: "Say 10 English words related to the given topic.",
+                successIndicator: "Peserta mampu menyebutkan 10 kosakata bahasa Inggris yang sesuai dengan tema yang ditentukan.",
+                duration: 60,
+                requiresGivenInput: true
+            },
+            8: {
+                id: 8,
+                title: "SPELL IT",
+                instruction: "Choose a word and spell it together, with each member saying one letter.",
+                successIndicator: "Peserta mampu mengeja kata yang dipilih secara bergantian, dengan setiap anggota menyebutkan satu huruf dalam urutan yang benar hingga kata selesai.",
+                duration: 60,
+                requiresGivenInput: false
+            },
+            9: {
+                id: 9,
+                title: "SENTENCE TRANSFORMATION",
+                instruction: "Make one positive sentence, then change it into negative and question forms.",
+                successIndicator: "Peserta mampu membuat satu kalimat positif dan mengubahnya menjadi bentuk negatif serta interogatif dengan struktur yang tepat.",
+                duration: 60,
+                requiresGivenInput: false
+            },
+            10: {
+                id: 10,
+                title: "ACTIVE–PASSIVE",
+                instruction: "Make one active sentence, then change it into passive voice.",
+                successIndicator: "Peserta mampu membuat satu kalimat aktif dan mengubahnya menjadi bentuk pasif dengan struktur yang tepat.",
+                duration: 60,
+                requiresGivenInput: false
+            },
+            11: {
+                id: 11,
+                title: "CHAIN ONE WORD",
+                instruction: "Repeat the sentence and change one word. Continue the chain with your teammates.",
+                successIndicator: "Peserta mampu mengulang kalimat sebelumnya dan mengubah satu kata secara bergantian hingga seluruh anggota mendapat giliran.",
+                duration: 60,
+                requiresGivenInput: false
+            }
+        };
+
+        /* ==========================================================================
+           BOARD PATH SEQUENCES & MAPPING
+           ========================================================================== */
+        // Team 1 path from Start to Finish
+        const PATH_TEAM1 = [
+            'start-t1', 'left-1', 'left-2', 'left-3', 'left-4', 'left-5', 'left-6',
+            'center-7', 'vert-8', 'vert-9', 'vert-10', 'vert-11', 'finish'
+        ];
+
+        // Team 2 path from Start to Finish
+        const PATH_TEAM2 = [
+            'start-t2', 'right-1', 'right-2', 'right-3', 'right-4', 'right-5', 'right-6',
+            'center-7', 'vert-8', 'vert-9', 'vert-10', 'vert-11', 'finish'
+        ];
+
+        /* ==========================================================================
+           CENTRAL GAME STATE
+           ========================================================================== */
+        let gameState = {
+            team1Index: 0,
+            team2Index: 0,
+            team1Cards: { attack: 'AVAILABLE', defense: 'AVAILABLE', lucky: 'AVAILABLE' },
+            team2Cards: { attack: 'AVAILABLE', defense: 'AVAILABLE', lucky: 'AVAILABLE' },
+            activeTimer: null,
+            timeRemaining: 60,
+            currentChallengeId: null,
+            pendingCardAction: null
+        };
+
+        window.onload = function() {
+            renderPawns();
+            updateCardUI();
+            logActivity("Game initialized. English Ludo Ready!");
+        };
+
+        /* ==========================================================================
+           PAWN RENDERER
+           ========================================================================== */
+        function renderPawns() {
+            // Clear all pawn containers
+            const allContainers = document.querySelectorAll('[id^="pawn-container-"]');
+            allContainers.forEach(c => c.innerHTML = '');
+
+            // Team 1 Pawn
+            const t1TileId = PATH_TEAM1[gameState.team1Index];
+            const t1Container = document.getElementById(`pawn-container-${t1TileId}`);
+            if (t1Container) {
+                t1Container.innerHTML += `
+                    <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-tr from-teamRed-dark to-teamRed border-2 border-white shadow-[0_0_10px_#DC2626] flex items-center justify-center text-white text-[9px] font-bold z-30 animate-pulse">
+                        <i class="fa-solid fa-chess-pawn"></i>
+                    </div>
+                `;
+            }
+
+            // Team 2 Pawn
+            const t2TileId = PATH_TEAM2[gameState.team2Index];
+            const t2Container = document.getElementById(`pawn-container-${t2TileId}`);
+            if (t2Container) {
+                t2Container.innerHTML += `
+                    <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-tr from-teamBlue-dark to-teamBlue border-2 border-white shadow-[0_0_10px_#2563EB] flex items-center justify-center text-white text-[9px] font-bold z-30 animate-pulse">
+                        <i class="fa-solid fa-chess-pawn"></i>
+                    </div>
+                `;
+            }
+
+            // Update Header Badges
+            document.getElementById('t1-pos-badge').innerText = `Tile: ${getTileLabel(t1TileId)}`;
+            document.getElementById('t2-pos-badge').innerText = `Tile: ${getTileLabel(t2TileId)}`;
+        }
+
+        function getTileLabel(tileId) {
+            if (tileId.startsWith('start')) return 'START';
+            if (tileId === 'finish') return 'FINISH';
+            if (tileId === 'center-7') return '7 (Junction)';
+            if (tileId.startsWith('vert-')) return tileId.replace('vert-', '');
+            if (tileId.startsWith('left-')) return tileId.replace('left-', '');
+            if (tileId.startsWith('right-')) return tileId.replace('right-', '');
+            return tileId;
+        }
+
+        /* ==========================================================================
+           TEAM MOVEMENT CONTROLS
+           ========================================================================== */
+        function moveTeam(team, steps) {
+            if (team === 'team1') {
+                let newIndex = gameState.team1Index + steps;
+                newIndex = Math.max(0, Math.min(PATH_TEAM1.length - 1, newIndex));
+                gameState.team1Index = newIndex;
+                logActivity(`Team 1 moved to ${getTileLabel(PATH_TEAM1[newIndex])}.`);
+            } else {
+                let newIndex = gameState.team2Index + steps;
+                newIndex = Math.max(0, Math.min(PATH_TEAM2.length - 1, newIndex));
+                gameState.team2Index = newIndex;
+                logActivity(`Team 2 moved to ${getTileLabel(PATH_TEAM2[newIndex])}.`);
+            }
+            renderPawns();
+        }
+
+        function movePawnToStart(team) {
+            if (team === 'team1') gameState.team1Index = 0;
+            if (team === 'team2') gameState.team2Index = 0;
+            logActivity(`${team === 'team1' ? 'Team 1' : 'Team 2'} moved to START.`);
+            renderPawns();
+        }
+
+        function rollDice() {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('dice-result').innerText = roll;
+            logActivity(`Dice Rolled: ${roll}`);
+        }
+
+        /* ==========================================================================
+           CARD SYSTEM LOGIC
+           ========================================================================== */
+        function handleCardClick(team, cardType) {
+            const currentStatus = gameState[`${team}Cards`][cardType];
+            if (currentStatus === 'USED') return; // Cannot click used cards
+
+            gameState.pendingCardAction = { team, cardType };
+
+            if (cardType === 'attack') {
+                const oppTeam = team === 'team1' ? 'Team 2' : 'Team 1';
+                openConfirmModal(
+                    'USE ATTACK CARD?',
+                    `This will attempt to move ${oppTeam} back 3 steps on the board.`,
+                    'fa-burst'
+                );
+            } else if (cardType === 'defense') {
+                openConfirmModal(
+                    'ACTIVATE DEFENSE CARD?',
+                    'This card will protect your team from the next opposing attack.',
+                    'fa-shield-halved'
+                );
+            } else if (cardType === 'lucky') {
+                openConfirmModal(
+                    'USE LUCKY CARD?',
+                    'This card will protect your team from one challenge by skipping it.',
+                    'fa-clover'
+                );
+            }
+        }
+
+        function openConfirmModal(title, msg, iconClass) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-msg').innerText = msg;
+            document.getElementById('confirm-icon').className = `fa-solid ${iconClass}`;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal(isConfirmed) {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (isConfirmed && gameState.pendingCardAction) {
+                executeCardAction(gameState.pendingCardAction.team, gameState.pendingCardAction.cardType);
+            }
+            gameState.pendingCardAction = null;
+        }
+
+        function executeCardAction(team, cardType) {
+            const isTeam1 = team === 'team1';
+            const oppTeamKey = isTeam1 ? 'team2' : 'team1';
+            const oppTeamName = isTeam1 ? 'Team 2' : 'Team 1';
+            const myTeamName = isTeam1 ? 'Team 1' : 'Team 2';
+
+            if (cardType === 'attack') {
+                // Check if opponent has active defense
+                if (gameState[`${oppTeamKey}Cards`].defense === 'ACTIVE') {
+                    // ATTACK BLOCKED
+                    gameState[`${oppTeamKey}Cards`].defense = 'USED';
+                    updateCardUI();
+                    logActivity(`Attack blocked! ${oppTeamName}'s Defense protected them.`);
+                    
+                    showFullscreenNotification(
+                        'fa-shield-virus',
+                        'ATTACK BLOCKED!',
+                        'Defense Active',
+                        `${oppTeamName}'s Defense Card successfully blocked ${myTeamName}'s attack!`
+                    );
+                } else {
+                    // ATTACK SUCCESSFUL
+                    gameState[`${team}Cards`].attack = 'USED';
+                    updateCardUI();
+
+                    // Move opponent back 3 steps
+                    if (oppTeamKey === 'team1') {
+                        gameState.team1Index = Math.max(0, gameState.team1Index - 3);
+                    } else {
+                        gameState.team2Index = Math.max(0, gameState.team2Index - 3);
+                    }
+                    renderPawns();
+                    logActivity(`${myTeamName} used Attack! ${oppTeamName} moved back 3 steps.`);
+
+                    showFullscreenNotification(
+                        'fa-burst',
+                        '⚔ ATTACK CARD USED ⚔',
+                        `${myTeamName} Attacked!`,
+                        `${oppTeamName} has been pushed backward 3 steps on the board!`
+                    );
+                }
+            } else if (cardType === 'defense') {
+                gameState[`${team}Cards`].defense = 'ACTIVE';
+                updateCardUI();
+                logActivity(`${myTeamName} activated Defense Card.`);
+
+                showFullscreenNotification(
+                    'fa-shield-halved',
+                    'DEFENSE ACTIVATED',
+                    'Shield Up',
+                    `${myTeamName} is now protected from the next incoming attack!`
+                );
+            } else if (cardType === 'lucky') {
+                gameState[`${team}Cards`].lucky = 'USED';
+                updateCardUI();
+                logActivity(`${myTeamName} used Lucky Card. Challenge skipped!`);
+
+                showFullscreenNotification(
+                    'fa-clover',
+                    'LUCKY CARD USED',
+                    'Challenge Skipped',
+                    `${myTeamName} used Lucky Card! Challenge has been skipped!`
+                );
+            }
+        }
+
+        function updateCardUI() {
+            ['team1', 'team2'].forEach(team => {
+                ['attack', 'defense', 'lucky'].forEach(cardType => {
+                    const status = gameState[`${team}Cards`][cardType];
+                    const cardEl = document.getElementById(`card-${team === 'team1' ? 't1' : 't2'}-${cardType}`);
+                    const statusBadge = document.getElementById(`status-${team === 'team1' ? 't1' : 't2'}-${cardType}`);
+
+                    if (!cardEl || !statusBadge) return;
+
+                    if (status === 'AVAILABLE') {
+                        cardEl.className = "flex-1 bg-navy-900 border border-gold-500/40 rounded-lg p-2 flex items-center justify-between cursor-pointer hover:border-gold-300 hover:bg-navy-700 transition relative overflow-hidden shadow";
+                        statusBadge.innerText = "AVAILABLE";
+                        statusBadge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/40";
+                    } else if (status === 'ACTIVE') {
+                        cardEl.className = "flex-1 bg-navy-800 border-2 border-gold-400 rounded-lg p-2 flex items-center justify-between cursor-pointer transition relative overflow-hidden shadow gold-glow";
+                        statusBadge.innerText = "ACTIVE";
+                        statusBadge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-400 animate-pulse";
+                    } else if (status === 'USED') {
+                        cardEl.className = "flex-1 bg-navy-950 border border-gray-700 rounded-lg p-2 flex items-center justify-between card-grayscale opacity-60 shadow";
+                        statusBadge.innerText = "USED";
+                        statusBadge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-600";
+                    }
+                });
+            });
+        }
+
+        function showFullscreenNotification(icon, title, subtitle, desc) {
+            document.getElementById('notify-icon').className = `fa-solid ${icon}`;
+            document.getElementById('notify-title').innerText = title;
+            document.getElementById('notify-subtitle').innerText = subtitle;
+            document.getElementById('notify-description').innerText = desc;
+
+            const overlay = document.getElementById('fullscreen-notification');
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 2600);
+        }
+
+        /* ==========================================================================
+           CHALLENGE MODAL & TIMER LOGIC
+           ========================================================================== */
+        function openChallenge(challengeId) {
+            if (challengeId === 'FINISH') {
+                showFullscreenNotification(
+                    'fa-crown',
+                    'VICTORY REACHED!',
+                    'Royal Ludo Champion',
+                    'A team has reached the FINISH crown area! Congratulations!'
+                );
+                return;
+            }
+
+            const challenge = CHALLENGES[challengeId];
+            if (!challenge) return;
+
+            gameState.currentChallengeId = challengeId;
+            document.getElementById('challenge-num-badge').innerText = challenge.id;
+            document.getElementById('challenge-header-title').innerText = `CHALLENGE ${challenge.id}`;
+            document.getElementById('challenge-title').innerText = challenge.title;
+            document.getElementById('challenge-instruction').innerText = challenge.instruction;
+            document.getElementById('challenge-success').innerText = challenge.successIndicator;
+
+            // Handle Input Field visibility
+            const inputContainer = document.getElementById('given-word-container');
+            if (challenge.requiresGivenInput) {
+                inputContainer.classList.remove('hidden');
+                document.getElementById('given-word-input').value = '';
+            } else {
+                inputContainer.classList.add('hidden');
+            }
+
+            resetTimer();
+            document.getElementById('challenge-modal').classList.remove('hidden');
+            logActivity(`Opened Challenge ${challengeId}: ${challenge.title}`);
+        }
+
+        function closeChallengeModal() {
+            pauseTimer();
+            document.getElementById('challenge-modal').classList.add('hidden');
+        }
+
+        function startTimer() {
+            if (gameState.activeTimer) return;
+            gameState.activeTimer = setInterval(() => {
+                if (gameState.timeRemaining > 0) {
+                    gameState.timeRemaining--;
+                    updateTimerDisplay();
+                } else {
+                    pauseTimer();
+                    logActivity(`Challenge ${gameState.currentChallengeId} Timer expired! TIME'S UP!`);
+                    alert("TIME'S UP! Judge please evaluate using the Success Indicator.");
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (gameState.activeTimer) {
+                clearInterval(gameState.activeTimer);
+                gameState.activeTimer = null;
+            }
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            gameState.timeRemaining = 60;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(gameState.timeRemaining / 60);
+            const secs = gameState.timeRemaining % 60;
+            document.getElementById('timer-display').innerText = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        /* ==========================================================================
+           UTILITIES & LOGGING
+           ========================================================================== */
+        function logActivity(text) {
+            const logBox = document.getElementById('activity-log');
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const item = document.createElement('div');
+            item.className = 'text-[10px] leading-tight border-b border-navy-800 pb-0.5';
+            item.innerHTML = `<span class="text-gold-500 font-bold">[${timeStr}]</span> ${text}`;
+            logBox.prepend(item);
+        }
+
+        function clearActivityLog() {
+            document.getElementById('activity-log').innerHTML = '<div class="text-gray-500 italic">Log cleared.</div>';
+        }
+
+        function toggleRuleModal() {
+            const modal = document.getElementById('rules-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function resetEntireGame() {
+            if (confirm("Reset entire game state, cards, and team positions?")) {
+                gameState = {
+                    team1Index: 0,
+                    team2Index: 0,
+                    team1Cards: { attack: 'AVAILABLE', defense: 'AVAILABLE', lucky: 'AVAILABLE' },
+                    team2Cards: { attack: 'AVAILABLE', defense: 'AVAILABLE', lucky: 'AVAILABLE' },
+                    activeTimer: null,
+                    timeRemaining: 60,
+                    currentChallengeId: null,
+                    pendingCardAction: null
+                };
+                renderPawns();
+                updateCardUI();
+                clearActivityLog();
+                logActivity("Game reset by Judge.");
+            }
+        }
+    </script>
+</body>
+</html>
